@@ -1,6 +1,11 @@
 import Event from './entities/event.entity';
 import Workshop from './entities/workshop.entity';
 
+import {Op, QueryTypes, Sequelize } from 'sequelize';
+import { dataSourceOptions } from '../../conf/datasource';
+
+const sequelize = new Sequelize(dataSourceOptions);
+
 
 
 export class EventsService {
@@ -168,6 +173,15 @@ export class EventsService {
     ```
      */
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+	const events = await Event.findAll({raw: true})
+
+	const eventsWithWorkshop = await Promise.all(events.map(async (event) => {
+		const workshops = await Workshop.findAll({where: {eventId: event.id, start: {
+			[Op.gt]: new Date()
+		} }, raw: true})
+		const eventWithWorkshops = {...event,  workshops}
+		return eventWithWorkshops
+	})) 
+	return eventsWithWorkshop.filter(event => event.workshops.length > 0)
   }
 }
