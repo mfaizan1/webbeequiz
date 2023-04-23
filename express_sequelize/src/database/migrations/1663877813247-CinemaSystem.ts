@@ -1,4 +1,6 @@
-import { QueryInterface } from 'sequelize';
+import {literal,  QueryInterface } from 'sequelize';
+import { ModelAttributes } from 'sequelize/types/model';
+
 
 export default {
   /**
@@ -31,8 +33,265 @@ export default {
    * As a cinema owner I don't want to configure the seating for every show
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  up: (queryInterface: QueryInterface): Promise<void> => {
-    throw new Error('TODO: implement migration in task 4');
+  up: async (queryInterface: QueryInterface): Promise<void> => {
+	
+
+
+	    await queryInterface.createTable('users', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: { type: 'varchar' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+    await queryInterface.createTable('movies', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      title: { type: 'varchar' },
+      duration: { type: 'integer' },
+      release_date: {
+        type: 'date',
+      },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+
+	await queryInterface.createTable('shows', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      show_time: { type: 'time' },
+      show_date: { type: 'date' },
+      hall_number: {
+        type: 'integer',
+      },
+	  is_booked_out: {type: 'boolean'},
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+	movieId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'movies',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+    } as ModelAttributes);
+
+
+    await queryInterface.createTable('cinemas', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: { type: 'string' },
+      address: { type: 'string' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      }
+    } as ModelAttributes);
+
+	await queryInterface.createTable('cinema_hall', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      hall_name: { type: 'string' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+	cinemaId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'cinemas',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+    } as ModelAttributes);
+
+	await queryInterface.createTable('pricing', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      price: { type: 'double' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+	showId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'shows',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+	cinemaId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'cinemas',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+    } as ModelAttributes);
+
+
+	await queryInterface.createTable('seat_types', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+       name: { type: 'string' },
+	   premiumPercentage: { type: 'double' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+    } as ModelAttributes);
+
+
+	await queryInterface.createTable('seats', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+	   isBooked: { type: 'boolean' },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+	  	hallId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'cinema_hall',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+    } as ModelAttributes);
+
+	await queryInterface.createTable('bookings', {
+      id: {
+        type: 'integer',
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      createdAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+      updatedAt: {
+        type: 'timestamp',
+        defaultValue: literal('CURRENT_TIMESTAMP'),
+      },
+	showId: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'shows',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+	  seat_id: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'seats',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },	
+	user_id: {
+        type: 'integer',
+        allowNull: true,
+        references: {
+          model: {
+            tableName: 'users',
+          },
+          key: 'id',
+        },
+        onDelete: 'cascade',
+      },
+    } as ModelAttributes);
+
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
